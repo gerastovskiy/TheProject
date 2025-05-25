@@ -1,0 +1,40 @@
+server:
+  port: 80
+
+logging:
+  level:
+    reactor:
+      netty: INFO
+    org:
+      springframework:
+        cloud:
+          gateway: TRACE
+
+spring:
+  cloud:
+    gateway:
+      httpserver:
+        wiretap: true
+      httpclient:
+        wiretap: true
+        ssl:
+          useInsecureTrustManager: true
+      routes:
+        - id: registration
+          uri: http://${AUTH_URL:auth-service}:${AUTH_PORT:8081}
+          predicates:
+            - Path=/registration
+          filters:
+            - RewritePath=/registration, /auth
+
+        - id: token
+          uri: http://${AUTH_URL:auth-service}:${AUTH_PORT:8081}
+          predicates:
+            - Path=/login
+          filters:
+            - RewritePath=/login, /auth/token
+
+        - id: user-service
+          uri: http://${USER_URL:user-service}:${USER_PORT:8080}
+          predicates:
+            - Path=/users/**

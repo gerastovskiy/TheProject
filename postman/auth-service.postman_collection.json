@@ -1,0 +1,125 @@
+{
+	"info": {
+		"_postman_id": "7afb5a9c-ed06-4459-a29c-28850b44cbf8",
+		"name": "auth-service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "44638191",
+		"_collection_link": "https://restless-comet-4502214.postman.co/workspace/F.'s-Workspace~daca031b-0c83-47c3-84d5-8aeef93323f6/collection/44638191-7afb5a9c-ed06-4459-a29c-28850b44cbf8?action=share&source=collection_link&creator=44638191"
+	},
+	"item": [
+		{
+			"name": "auth",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"clientId\": \"NewUser\",\r\n    \"clientSecret\": \"NewSecret\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}:8081/auth",
+					"host": [
+						"{{base_url}}"
+					],
+					"port": "8081",
+					"path": [
+						"auth"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "token",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"clientId\": \"NewUser\",\r\n    \"clientSecret\": \"NewSecret\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}:8081/auth/token",
+					"host": [
+						"{{base_url}}"
+					],
+					"port": "8081",
+					"path": [
+						"auth",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "livenessProbe Copy",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}:8081/actuator/health/liveness",
+					"host": [
+						"{{base_url}}"
+					],
+					"port": "8081",
+					"path": [
+						"actuator",
+						"health",
+						"liveness"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "readinessProbe Copy",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}:8081/actuator/health/readiness",
+					"host": [
+						"{{base_url}}"
+					],
+					"port": "8081",
+					"path": [
+						"actuator",
+						"health",
+						"readiness"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "health Copy",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}:8081/actuator/health",
+					"host": [
+						"{{base_url}}"
+					],
+					"port": "8081",
+					"path": [
+						"actuator",
+						"health"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

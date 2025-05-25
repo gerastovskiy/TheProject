@@ -1,0 +1,16 @@
+/auth-service/build/
+/auth-service/.gradle/
+/auth-service/gradle/
+/gateway/.gradle/
+/gateway/build/
+/gateway/gradle/
+/user-service/build/
+/user-service/.gradle/
+/user-service/gradle/
+/auth-service/gradlew
+/auth-service/gradlew.bat
+/gateway/gradlew
+/gateway/gradlew.bat
+/user-service/gradlew
+/user-service/gradlew.bat
+/.idea/
