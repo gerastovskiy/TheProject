@@ -7,9 +7,10 @@ RUN java -Djarmode=layertools -jar app.jar extract
 
 # 2 stage
 FROM openjdk:21-jdk
+ENV PORT=80
 WORKDIR app
-COPY --from=builder app/dependencies/ ./
 COPY --from=builder app/spring-boot-loader/ ./
+COPY --from=builder app/dependencies/ ./
 COPY --from=builder app/snapshot-dependencies/ ./
 COPY --from=builder app/application/ ./
 ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
