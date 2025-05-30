@@ -1,0 +1,97 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: postgres_db
+    restart: on-failure
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - project-network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  user-service:
+      image: user-service:0.1
+      container_name: user-service
+      restart: on-failure
+      depends_on:
+        postgres:
+          condition: service_healthy
+      ports:
+        - "8080:8080"
+      networks:
+        - project-network
+      environment:
+        VIRTUAL_HOST: user-service.docker
+        DB_HOST: postgres
+        DB_NAME: postgres
+        DB_USER: postgres
+        DB_PORT: 5432
+        DB_PASSWORD: "postgres"
+        SPRING_PROFILES_ACTIVE: docker
+      healthcheck:
+            test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 60s
+      volumes:
+        - ./logs:/app/logs
+
+  auth-service:
+      image: auth-service:0.1
+      container_name: auth-service
+      restart: on-failure
+      depends_on:
+        postgres:
+          condition: service_healthy
+      ports:
+        - "8081:8081"
+      networks:
+        - project-network
+      environment:
+        VIRTUAL_HOST: auth-service.docker
+        DB_HOST: postgres
+        DB_NAME: postgres
+        DB_USER: postgres
+        DB_PORT: 5432
+        DB_PASSWORD: "postgres"
+        SPRING_PROFILES_ACTIVE: docker
+      healthcheck:
+            test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 60s
+      volumes:
+        - ./logs:/app/logs
+
+  gateway:
+      image: gateway:0.1
+      container_name: gateway
+      ports:
+        - "80:80"
+      networks:
+        - project-network
+      environment:
+        VIRTUAL_HOST: gateway.docker
+        SPRING_PROFILES_ACTIVE: docker
+      volumes:
+        - ./logs:/app/logs
+
+networks:
+  project-network:
+    name: project-network
+    driver: bridge
+
+volumes:
+  postgres_data:
