@@ -3,9 +3,9 @@ server:
 
 spring:
   datasource:
-    username: ${DB_USER:postgres}
+    username: ${DB_USER:user_db}
     password: ${DB_PASSWORD:postgres}
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:postgres}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:user_db}
     driverClassName: org.postgresql.Driver
   jpa:
     properties:
@@ -52,12 +52,13 @@ management:
     health:
       show-details: always
   metrics:
-    export:
-      prometheus:
-        enabled: true
     distribution:
       percentiles-histogram:
         "[http.server.requests]": true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
 
 auth:
   jwt:

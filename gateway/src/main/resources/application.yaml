@@ -12,13 +12,13 @@ logging:
 
 spring:
   cloud:
-    gateway:
+    gateway.server.webflux:
       httpserver:
         wiretap: true
       httpclient:
         wiretap: true
         ssl:
-          useInsecureTrustManager: true
+          use-insecure-trust-manager: true
       routes:
         - id: registration
           uri: http://${AUTH_URL:auth-service}:${AUTH_PORT:8081}
@@ -38,3 +38,9 @@ spring:
           uri: http://${USER_URL:user-service}:${USER_PORT:8080}
           predicates:
             - Path=/users/**
+
+management:
+  prometheus:
+    metrics:
+      export:
+        enabled: true
