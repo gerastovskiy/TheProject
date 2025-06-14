@@ -1,0 +1,62 @@
+{
+"vhosts": [
+    {
+      "name": "/"
+    }
+  ],
+"queues": [
+    {
+        "name": "*.billing.events",
+        "vhost": "/",
+        "durable": true,
+        "auto_delete": false,
+        "arguments": {}
+    },
+    {
+        "name": "*.notification.events",
+        "vhost": "/",
+        "durable": true,
+        "auto_delete": false,
+        "arguments": {}
+    }
+],
+"exchanges": [],
+"bindings": [
+    {
+        "source": "amq.topic",
+        "vhost": "/",
+        "destination": "*.billing.events",
+        "destination_type": "queue",
+        "routing_key": "#.billing.events",
+        "arguments": {}
+    },
+    {
+        "source": "amq.topic",
+        "vhost": "/",
+        "destination": "*.notification.events",
+        "destination_type": "queue",
+        "routing_key": "#.notification.events",
+        "arguments": {}
+    }
+  ],
+"users": [
+    {
+      "name": "rabbit-mq",
+      "password_hash": "3iGGuXLw30VhgmesqQ2U/rVMGNcnwe27t322BVYD54E2QiYG",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": [
+        "administrator"
+      ],
+      "limits": {}
+    }
+  ],
+"permissions": [
+    {
+      "user": "rabbit-mq",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ]
+ }

@@ -11,12 +11,10 @@ import ru.services.user.validation.ValidateAfterMapping;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
     @ValidateAfterMapping
+    @Mapping(target = "role", ignore = true)
     User toUser(UserRequest userRequest);
-
     @Mapping(target = "role", constant = "USER")
     UserEntity toUserEntity(User user);
-
     User toUser(UserEntity userEntity);
-
     UserResponse toResponse(User user);
 }

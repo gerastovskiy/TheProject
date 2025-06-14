@@ -29,6 +29,11 @@ spring:
     baseline-on-migrate: true
     baseline-version: 1
     table: flyway_schema_history_user
+  rabbitmq:
+    username: ${MQ_USER:rabbit-mq}
+    password: ${MQ_PASSWORD:rabbit-mq}
+    host: ${MQ_HOST:localhost}
+    port: ${MQ_PORT:5672}
 
 logging:
   level:
@@ -39,6 +44,14 @@ logging:
         orm:
           jdbc:
             bind: trace
+
+rabbitmq:
+  exchange:
+    name: amq.topic
+  billing-routing-key:
+    name: create.billing.events
+  notification-routing-key:
+    name: message.notification.events
 
 management:
   endpoint:

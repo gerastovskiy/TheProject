@@ -58,7 +58,6 @@ public class UserServiceImpl implements UserService {
             throw new DuplicateUserException(user.username());
 
         UserEntity userEntity = mapper.toUserEntity(user);
-
         return mapper.toUser(userRepository.save(userEntity));
     }
 

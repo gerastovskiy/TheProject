@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.services.user.mapper.UserMapper;
 import ru.services.user.model.UserRequest;
 import ru.services.user.model.UserResponse;
+import ru.services.user.service.MessageSenderService;
 import ru.services.user.service.UserService;
 
 @RestController
@@ -18,6 +19,7 @@ import ru.services.user.service.UserService;
 public class UserController {
     private final UserService userService;
     private final UserMapper mapper;
+    private final MessageSenderService messageSenderService;
 
     @Operation(summary = "Get user by ID")
     @ApiResponses({
@@ -70,7 +72,11 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponse create(@RequestBody @Valid UserRequest request) {
         var user = userService.createUser(mapper.toUser(request));
-        return mapper.toResponse(user);
+        var UserResponse = mapper.toResponse(user);
+
+        messageSenderService.sendBillingMessage(UserResponse);
+
+        return UserResponse;
     }
 
     @Operation(summary = "Update user")

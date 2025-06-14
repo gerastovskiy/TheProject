@@ -1,0 +1,222 @@
+services:
+  postgres:
+    image: postgres:17.5
+    container_name: postgres-db
+    restart: "no"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_MULTIPLE_DATABASES: auth_db, user_db, order_db, billing_db, notification_db
+    ports:
+      - 5432:5432
+    networks:
+      - project-network
+    volumes:
+      - ./init/postgresql.sh:/docker-entrypoint-initdb.d/multiple-databases.sh
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:4.1.1-management
+    container_name: rabbit-mq
+    hostname: rabbitmq
+    restart: "no"
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit log_levels [{connection,error},{default,error}] disk_free_limit 2147483648
+    ports:
+      - 15672:15672
+      - 5672:5672
+    networks:
+      - project-network
+    volumes:
+      - ./init/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./init/definitions.json:/etc/rabbitmq/definitions.json:ro
+      - rabbitmq:/var/lib/rabbitmq
+
+  gateway:
+      image: gateway:0.1
+      container_name: gateway
+      restart: "no"
+      ports:
+        - 80:80
+      networks:
+        - project-network
+      environment:
+        VIRTUAL_HOST: gateway.docker
+        SPRING_PROFILES_ACTIVE: docker
+      volumes:
+        - logs:/app/logs
+
+  auth-service:
+      image: auth-service:0.1
+      container_name: auth-service
+      restart: "no"
+      depends_on:
+        postgres:
+          condition: service_healthy
+      ports:
+        - 8081:8081
+      networks:
+        - project-network
+      environment:
+        VIRTUAL_HOST: auth-service.docker
+        DB_HOST: postgres
+        DB_NAME: auth_db
+        DB_USER: auth_db
+        DB_PORT: 5432
+        DB_PASSWORD: postgres
+        SPRING_PROFILES_ACTIVE: docker
+      healthcheck:
+            test: ["CMD-SHELL", "curl -f http://localhost:8081/actuator/health || exit 1"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 60s
+      volumes:
+        - logs:/app/logs
+
+  user-service:
+      image: user-service:0.1
+      container_name: user-service
+      restart: "no"
+      depends_on:
+        postgres:
+          condition: service_healthy
+      ports:
+        - 8080:8080
+      networks:
+        - project-network
+      environment:
+        VIRTUAL_HOST: user-service.docker
+        DB_HOST: postgres
+        DB_NAME: user_db
+        DB_USER: user_db
+        DB_PORT: 5432
+        DB_PASSWORD: postgres
+        MQ_HOST: rabbitmq
+        MQ_USER: rabbit-mq
+        MQ_PASSWORD: rabbit-mq
+        MQ_PORT: 5672
+        SPRING_PROFILES_ACTIVE: docker
+      healthcheck:
+            test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 60s
+      volumes:
+        - logs:/app/logs
+
+  billing-service:
+      image: billing-service:0.1
+      container_name: billing-service
+      restart: "no"
+      depends_on:
+        postgres:
+          condition: service_healthy
+      ports:
+        - 8082:8082
+      networks:
+        - project-network
+      environment:
+        VIRTUAL_HOST: billing-service.docker
+        DB_HOST: postgres
+        DB_NAME: billing_db
+        DB_USER: billing_db
+        DB_PORT: 5432
+        DB_PASSWORD: postgres
+        MQ_HOST: rabbitmq
+        MQ_USER: rabbit-mq
+        MQ_PASSWORD: rabbit-mq
+        MQ_PORT: 5672
+        SPRING_PROFILES_ACTIVE: docker
+      healthcheck:
+            test: ["CMD-SHELL", "curl -f http://localhost:8082/actuator/health || exit 1"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 60s
+      volumes:
+        - logs:/app/logs
+
+  order-service:
+      image: order-service:0.1
+      container_name: order-service
+      restart: "no"
+      depends_on:
+        postgres:
+          condition: service_healthy
+      ports:
+        - 8083:8083
+      networks:
+        - project-network
+      environment:
+        VIRTUAL_HOST: order-service.docker
+        DB_HOST: postgres
+        DB_NAME: order_db
+        DB_USER: order_db
+        DB_PORT: 5432
+        DB_PASSWORD: postgres
+        MQ_HOST: rabbitmq
+        MQ_USER: rabbit-mq
+        MQ_PASSWORD: rabbit-mq
+        MQ_PORT: 5672
+        BILLING_HOST: billing-service
+        BILLING_PORT: 8082
+        SPRING_PROFILES_ACTIVE: docker
+      healthcheck:
+            test: ["CMD-SHELL", "curl -f http://localhost:8083/actuator/health || exit 1"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 60s
+      volumes:
+        - logs:/app/logs
+
+  notification-service:
+      image: notification-service:0.1
+      container_name: notification-service
+      restart: "no"
+      depends_on:
+        postgres:
+          condition: service_healthy
+      ports:
+        - 8084:8084
+      networks:
+        - project-network
+      environment:
+        VIRTUAL_HOST: notification-service.docker
+        DB_HOST: postgres
+        DB_NAME: notification_db
+        DB_USER: notification_db
+        DB_PORT: 5432
+        DB_PASSWORD: postgres
+        MQ_HOST: rabbitmq
+        MQ_USER: rabbit-mq
+        MQ_PASSWORD: rabbit-mq
+        MQ_PORT: 5672
+        SPRING_PROFILES_ACTIVE: docker
+      healthcheck:
+            test: ["CMD-SHELL", "curl -f http://localhost:8084/actuator/health || exit 1"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 60s
+      volumes:
+        - logs:/app/logs
+
+networks:
+  project-network:
+    name: project-network
+    driver: bridge
+
+volumes:
+  postgres_data:
+  rabbitmq:
+  logs:

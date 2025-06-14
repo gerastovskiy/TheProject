@@ -39,6 +39,20 @@ spring:
           predicates:
             - Path=/users/**
 
+        - id: billing-service
+          uri: http://${USER_URL:billing-service}:${USER_PORT:8082}
+          predicates:
+            - Path=/billing/**
+
+        - id: order-service
+          uri: http://${USER_URL:order-service}:${USER_PORT:8083}
+          predicates:
+            - Path=/order/**
+
+        - id: notification-service
+          uri: http://${USER_URL:notification-service}:${USER_PORT:8084}
+          predicates:
+            - Path=/notification/**
 management:
   prometheus:
     metrics:
