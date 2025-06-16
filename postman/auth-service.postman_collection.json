@@ -14,7 +14,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"clientId\": \"NewUser\",\r\n    \"clientSecret\": \"NewSecret\"\r\n}",
+					"raw": "{\r\n    \"clientId\": \"NewUser10\",\r\n    \"clientSecret\": \"NewSecret\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -41,7 +41,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"clientId\": \"NewUser\",\r\n    \"clientSecret\": \"NewSecret\"\r\n}",
+					"raw": "{\r\n    \"clientId\": \"NewUser10\",\r\n    \"clientSecret\": \"NewSecret\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -57,65 +57,6 @@
 					"path": [
 						"auth",
 						"token"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "livenessProbe Copy",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{base_url}}:8081/actuator/health/liveness",
-					"host": [
-						"{{base_url}}"
-					],
-					"port": "8081",
-					"path": [
-						"actuator",
-						"health",
-						"liveness"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "readinessProbe Copy",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{base_url}}:8081/actuator/health/readiness",
-					"host": [
-						"{{base_url}}"
-					],
-					"port": "8081",
-					"path": [
-						"actuator",
-						"health",
-						"readiness"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "health Copy",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{base_url}}:8081/actuator/health",
-					"host": [
-						"{{base_url}}"
-					],
-					"port": "8081",
-					"path": [
-						"actuator",
-						"health"
 					]
 				}
 			},

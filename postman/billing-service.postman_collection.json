@@ -1,0 +1,101 @@
+{
+	"info": {
+		"_postman_id": "31ba57d7-8213-467b-8fe7-c3f042ef3311",
+		"name": "billing-service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "44638191",
+		"_collection_link": "https://restless-comet-4502214.postman.co/workspace/F.'s-Workspace~daca031b-0c83-47c3-84d5-8aeef93323f6/collection/44638191-31ba57d7-8213-467b-8fe7-c3f042ef3311?action=share&source=collection_link&creator=44638191"
+	},
+	"item": [
+		{
+			"name": "debit",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}:8082/billing/debit?username=NewUser&amount=111.11",
+					"host": [
+						"{{base_url}}"
+					],
+					"port": "8082",
+					"path": [
+						"billing",
+						"debit"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "NewUser"
+						},
+						{
+							"key": "amount",
+							"value": "111.11"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "credit",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}:8082/billing/credit?username=NewUser&amount=100.10",
+					"host": [
+						"{{base_url}}"
+					],
+					"port": "8082",
+					"path": [
+						"billing",
+						"credit"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "NewUser"
+						},
+						{
+							"key": "amount",
+							"value": "100.10"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
