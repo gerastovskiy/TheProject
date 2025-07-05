@@ -37,7 +37,13 @@ spring:
 
 logging:
   level:
+    com:
+      rabbitmq:
+        client: debug
     org:
+      springframework:
+        amqp: debug
+        retry: debug
       hibernate:
         type: trace
         stat: debug
@@ -48,12 +54,22 @@ logging:
 rabbitmq:
   exchange:
     name: amq.topic
+  order-routing-key:
+    name: message.order.events
+  billing-routing-key:
+    name: message.billing.events
+  store-routing-key:
+    name: message.store.events
+  delivery-routing-key:
+    name: message.delivery.events
   notification-routing-key:
     name: message.notification.events
+  queue:
+    name: "*.order.events"
 
-service:
-  billing:
-    url: http://${BILLING_HOST:localhost}:${BILLING_PORT:8082}
+#service:
+#  billing:
+#    url: http://${BILLING_HOST:localhost}:${BILLING_PORT:8082}
 
 management:
   endpoint:

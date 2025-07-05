@@ -37,7 +37,13 @@ spring:
 
 logging:
   level:
+    com:
+      rabbitmq:
+        client: debug
     org:
+      springframework:
+        amqp: debug
+        retry: debug
       hibernate:
         type: trace
         stat: debug
@@ -48,6 +54,8 @@ logging:
 rabbitmq:
   exchange:
     name: amq.topic
+  processed-routing-key:
+    name: message.order.events
   queue:
     name: "*.billing.events"
 

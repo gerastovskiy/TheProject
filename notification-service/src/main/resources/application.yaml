@@ -37,7 +37,13 @@ spring:
 
 logging:
   level:
+    com:
+      rabbitmq:
+        client: debug
     org:
+      springframework:
+        amqp: debug
+        retry: debug
       hibernate:
         type: trace
         stat: debug

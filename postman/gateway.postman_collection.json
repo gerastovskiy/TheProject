@@ -159,7 +159,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"NewUser\",\r\n    \"amount\": 100.01\r\n}",
+					"raw": "{\r\n    \"username\": \"NewUser\",\r\n    \"amount\": 100.01,\r\n    \"productId\": 1,\r\n    \"quantity\": 1\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -186,7 +186,34 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"NewUser\",\r\n    \"amount\": 1000000\r\n}",
+					"raw": "{\r\n    \"username\": \"NewUser\",\r\n    \"amount\": 1000,\r\n    \"productId\": 1,\r\n    \"quantity\": 10\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}:80/order",
+					"host": [
+						"{{base_url}}"
+					],
+					"port": "80",
+					"path": [
+						"order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "createOrder (количество недостаточно)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"NewUser\",\r\n    \"amount\": 1,\r\n    \"productId\": 2,\r\n    \"quantity\": 1\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -236,7 +263,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLXNlcnZpY2UiLCJhdWQiOiJ1c2VyLXNlcnZpY2UiLCJzdWIiOiJOZXdVc2VyIiwiaWF0IjoxNzQ5OTE3OTI5LCJleHAiOjE3NDk5MTk3Mjl9.TsgZGsm9F3j1n3PlFT0xHzM84g9_kuJIFABpYeQjCIo",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLXNlcnZpY2UiLCJhdWQiOiJ1c2VyLXNlcnZpY2UiLCJzdWIiOiJOZXdVc2VyIiwiaWF0IjoxNzUxNzQ1NjY2LCJleHAiOjE3NTE3NDc0NjZ9.Fgpu0h_q3QWfGQxoGGgBXp-Q_ckR32PnEs-fZ6sX98U",
 				"type": "string"
 			}
 		]

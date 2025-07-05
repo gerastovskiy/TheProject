@@ -3,6 +3,7 @@ package ru.services.user.service.impl;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.core.commands.CreateBillingAccountCommand;
 import ru.services.user.service.MessageSenderService;
 
 @Service
@@ -18,8 +19,8 @@ public class MessageSenderServiceImpl implements MessageSenderService {
     }
 
     @Override
-    public void sendBillingMessage(Object message) {
-        rabbitTemplate.convertAndSend(billingRoutingKey, message);
+    public void sendBillingMessage(CreateBillingAccountCommand command) {
+        rabbitTemplate.convertAndSend(billingRoutingKey, command);
     }
 
     @Override

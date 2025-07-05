@@ -2,6 +2,8 @@ package ru.services.user.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
+import ru.core.commands.CreateBillingAccountCommand;
 import ru.services.user.entity.UserEntity;
 import ru.services.user.model.User;
 import ru.services.user.model.UserRequest;
@@ -17,4 +19,6 @@ public interface UserMapper {
     UserEntity toUserEntity(User user);
     User toUser(UserEntity userEntity);
     UserResponse toResponse(User user);
+
+    CreateBillingAccountCommand createBillingAccountCommand(User user);
 }

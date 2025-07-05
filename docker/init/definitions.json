@@ -6,7 +6,28 @@
   ],
 "queues": [
     {
+        "name": "*.order.events",
+        "vhost": "/",
+        "durable": true,
+        "auto_delete": false,
+        "arguments": {}
+    },
+    {
         "name": "*.billing.events",
+        "vhost": "/",
+        "durable": true,
+        "auto_delete": false,
+        "arguments": {}
+    },
+    {
+        "name": "*.store.events",
+        "vhost": "/",
+        "durable": true,
+        "auto_delete": false,
+        "arguments": {}
+    },
+    {
+        "name": "*.delivery.events",
         "vhost": "/",
         "durable": true,
         "auto_delete": false,
@@ -25,9 +46,33 @@
     {
         "source": "amq.topic",
         "vhost": "/",
+        "destination": "*.order.events",
+        "destination_type": "queue",
+        "routing_key": "#.order.events",
+        "arguments": {}
+    },
+    {
+        "source": "amq.topic",
+        "vhost": "/",
         "destination": "*.billing.events",
         "destination_type": "queue",
         "routing_key": "#.billing.events",
+        "arguments": {}
+    },
+    {
+        "source": "amq.topic",
+        "vhost": "/",
+        "destination": "*.store.events",
+        "destination_type": "queue",
+        "routing_key": "#.store.events",
+        "arguments": {}
+    },
+    {
+        "source": "amq.topic",
+        "vhost": "/",
+        "destination": "*.delivery.events",
+        "destination_type": "queue",
+        "routing_key": "#.delivery.events",
         "arguments": {}
     },
     {

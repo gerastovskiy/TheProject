@@ -11,4 +11,6 @@ public class Order{
     String username;
     BigDecimal amount;
     OrderStatus status;
+    Long productId;
+    Integer quantity;
 }

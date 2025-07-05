@@ -12,6 +12,8 @@ SERVICES=(
     "./user-service"
     "./billing-service"
     "./order-service"
+    "./store-service"
+    "./delivery-service"
     "./notification-service"
 )
 
@@ -159,6 +161,8 @@ while true; do
     
     case $choice in
         1)  # Сборка приложений
+            build_application $(realpath "$BASE_DIR/core");
+
             for service_path in "${SERVICES[@]}"; do
                 abs_path=$(realpath "$BASE_DIR/$service_path")
                 if ! build_application "$abs_path"; then
@@ -183,6 +187,8 @@ while true; do
             fi
             ;;
         4)  # Полный цикл
+            build_application $(realpath "$BASE_DIR/core");
+            
             for service_path in "${SERVICES[@]}"; do
                 abs_path=$(realpath "$BASE_DIR/$service_path")
                 if ! build_application "$abs_path"; then

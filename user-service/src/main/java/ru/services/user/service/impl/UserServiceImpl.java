@@ -9,6 +9,7 @@ import ru.services.user.exception.UserNotFoundException;
 import ru.services.user.mapper.UserMapper;
 import ru.services.user.model.User;
 import ru.services.user.repository.UserRepository;
+import ru.services.user.service.MessageSenderService;
 import ru.services.user.service.UserService;
 
 @Transactional
@@ -17,6 +18,7 @@ import ru.services.user.service.UserService;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper mapper;
+    private final MessageSenderService messageSenderService;
 
     @Override
     public User getUser(Long id) {
@@ -58,7 +60,11 @@ public class UserServiceImpl implements UserService {
             throw new DuplicateUserException(user.username());
 
         UserEntity userEntity = mapper.toUserEntity(user);
-        return mapper.toUser(userRepository.save(userEntity));
+        userRepository.save(userEntity);
+
+        user = mapper.toUser(userEntity);
+        messageSenderService.sendBillingMessage(mapper.createBillingAccountCommand(user));
+        return user;
     }
 
     @Override
@@ -67,7 +73,6 @@ public class UserServiceImpl implements UserService {
             throw new UserNotFoundException("User not found: id = " + user.id());
 
         UserEntity userEntity = mapper.toUserEntity(user);
-
         return mapper.toUser(userRepository.save(userEntity));
     }
 }

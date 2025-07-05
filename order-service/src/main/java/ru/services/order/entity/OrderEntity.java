@@ -26,4 +26,9 @@ public class OrderEntity {
     private BigDecimal amount;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
+    @Positive(message = "Product id must be positive")
+    @Column(name = "product_id")
+    Long productId;
+    @Positive(message = "Product quantity must be positive")
+    Integer quantity;
 }
