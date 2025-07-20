@@ -34,6 +34,11 @@ spring:
     password: ${MQ_PASSWORD:rabbit-mq}
     host: ${MQ_HOST:localhost}
     port: ${MQ_PORT:5672}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:password}
 
 logging:
   level:

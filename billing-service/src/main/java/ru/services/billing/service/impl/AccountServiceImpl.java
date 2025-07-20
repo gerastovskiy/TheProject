@@ -1,12 +1,14 @@
 package ru.services.billing.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.services.billing.entity.AccountEntity;
 import ru.services.billing.exception.DuplicateAccountException;
 import ru.services.billing.exception.AccountNotFoundException;
 import ru.services.billing.exception.InsufficientFundsException;
+import ru.services.billing.exception.PaymentAlreadyProcessed;
 import ru.services.billing.mapper.AccountMapper;
 import ru.services.billing.model.Account;
 import ru.services.billing.repository.AccountRepository;
@@ -19,6 +21,7 @@ import java.math.BigDecimal;
 public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
     private final AccountMapper mapper;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Override
     public Account createAccount(Account account) {
@@ -54,21 +57,29 @@ public class AccountServiceImpl implements AccountService {
 
 
     @Override
-    public Account debitAccount(String username, BigDecimal amount) {
+    public Account debitAccount(String username, BigDecimal amount, String idempotencyKey) {
+        if (!idempotencyKey.isEmpty() && redisTemplate.hasKey(idempotencyKey))
+            throw new PaymentAlreadyProcessed(idempotencyKey);
+
         AccountEntity accountEntity = getAccountPrivate(username);
         accountEntity.setAmount(accountEntity.getAmount().add(amount));
         accountRepository.save(accountEntity);
+        redisTemplate.opsForValue().set(idempotencyKey, accountEntity.getId().toString());
 
         return mapper.toAccount(accountEntity);
     }
 
     @Override
-    public Account creditAccount(String username, BigDecimal amount) {
+    public Account creditAccount(String username, BigDecimal amount, String idempotencyKey) {
+        if (!idempotencyKey.isEmpty() && redisTemplate.hasKey(idempotencyKey))
+            throw new PaymentAlreadyProcessed(idempotencyKey);
+
         AccountEntity accountEntity = getAccountPrivate(username);
         if (accountEntity.getAmount().compareTo(amount) < 0) throw new InsufficientFundsException(amount);
 
         accountEntity.setAmount(accountEntity.getAmount().subtract(amount));
         accountRepository.save(accountEntity);
+        redisTemplate.opsForValue().set(idempotencyKey, accountEntity.getId().toString());
 
         return mapper.toAccount(accountEntity);
     }

@@ -7,6 +7,6 @@ public interface UserService {
     User getUser(String username);
     void deleteUser(Long id);
     void deleteUser(String username);
-    User createUser(User user);
+    User createUser(User user, String idempotencyKey);
     User updateUser(User user);
 }

@@ -3,9 +3,11 @@ package ru.services.order.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.services.order.entity.OrderEntity;
+import ru.services.order.exception.OrderAlreadyCreated;
 import ru.services.order.exception.OrderNotFoundException;
 import ru.services.order.mapper.OrderMapper;
 import ru.services.order.model.Order;
@@ -24,6 +26,8 @@ public class OrderServiceImpl implements OrderService {
     private final RabbitTemplate rabbitTemplate;
     private final OrderRepository orderRepository;
     private final OrderMapper mapper;
+    private final RedisTemplate<String, String> redisTemplate;
+
     //@Value("${service.billing.url}")
     //private String billingUrl;
     //private final RestClient restClient;
@@ -46,11 +50,16 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order createOrder(Order order) {
+    public Order createOrder(Order order, String idempotencyKey) {
+        if (redisTemplate.hasKey(idempotencyKey))
+            throw new OrderAlreadyCreated(idempotencyKey);
+
         OrderEntity orderEntity = mapper.toOrderEntity(order);
         orderRepository.save(orderEntity);
 
         order = mapper.toOrder(orderEntity);
+        redisTemplate.opsForValue().set(idempotencyKey, order.getId().toString());
+
         rabbitTemplate.convertAndSend(orderRoutingKey, mapper.toOrderCreatedEvent(order));
             return order;
 

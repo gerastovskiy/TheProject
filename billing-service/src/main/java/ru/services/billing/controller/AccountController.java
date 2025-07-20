@@ -23,8 +23,10 @@ public class AccountController {
             @ApiResponse(responseCode = "404", description = "Account not found")
     })
     @PutMapping(value = "/debit{username}{amount}")
-    public AccountResponse debitAccount(@RequestParam("username") String username, @RequestParam("amount") BigDecimal amount) {
-        var account = accountService.debitAccount(username, amount);
+    public AccountResponse debitAccount(@RequestParam("username") String username,
+                                        @RequestParam("amount") BigDecimal amount,
+                                        @RequestHeader("X-Request-ID") String idempotencyKey) {
+        var account = accountService.debitAccount(username, amount, idempotencyKey);
         return mapper.toResponse(account);
     }
 
@@ -34,8 +36,10 @@ public class AccountController {
             @ApiResponse(responseCode = "404", description = "Account not found / Insufficient funds")
     })
     @PutMapping(value = "/credit{username}{amount}")
-    public AccountResponse creditAccount(@RequestParam("username") String username, @RequestParam("amount") BigDecimal amount) {
-        var account = accountService.creditAccount(username, amount);
+    public AccountResponse creditAccount(@RequestParam("username") String username,
+                                         @RequestParam("amount") BigDecimal amount,
+                                         @RequestHeader("X-Request-ID") String idempotencyKey) {
+        var account = accountService.creditAccount(username, amount, idempotencyKey);
         return mapper.toResponse(account);
     }
 }

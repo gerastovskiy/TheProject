@@ -47,8 +47,9 @@ public class OrderController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public OrderResponse create(@RequestBody @Valid OrderRequest request,
+                                @RequestHeader("X-Request-ID") String idempotencyKey,
                                 @RequestHeader HttpHeaders headers) {
-        return mapper.toResponse(orderService.createOrder(mapper.toOrder(request)));
+        return mapper.toResponse(orderService.createOrder(mapper.toOrder(request), idempotencyKey));
     }
 
     @Operation(summary = "Reject order by id")

@@ -68,8 +68,9 @@ public class UserController {
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse create(@RequestBody @Valid UserRequest request) {
-        var user = userService.createUser(mapper.toUser(request));
+    public UserResponse create(@RequestBody @Valid UserRequest request,
+                               @RequestHeader("X-Request-ID") String idempotencyKey) {
+        var user = userService.createUser(mapper.toUser(request), idempotencyKey);
         return mapper.toResponse(user);
     }
 

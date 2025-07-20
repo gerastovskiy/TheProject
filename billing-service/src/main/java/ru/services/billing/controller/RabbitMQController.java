@@ -35,7 +35,7 @@ public class RabbitMQController {
     public void handleProcessPaymentCommand(ProcessPaymentCommand command) {
         // TODO: реализовать обработку ошибок
         try {
-            var account = accountService.creditAccount(command.getUsername(), command.getAmount());
+            var account = accountService.creditAccount(command.getUsername(), command.getAmount(), "");
             rabbitTemplate.convertAndSend(processedRoutingKey, mapper.toPaymentProcessedEvent(account, command.getOrderId()));
         }
         catch (Exception e) {
@@ -47,7 +47,7 @@ public class RabbitMQController {
     public void handleProcessPaymentCommand(CancelPaymentCommand command) {
         // TODO: реализовать обработку ошибок
         try {
-            var account = accountService.debitAccount(command.getUsername(), command.getAmount());
+            var account = accountService.debitAccount(command.getUsername(), command.getAmount(), "");
             rabbitTemplate.convertAndSend(processedRoutingKey, mapper.toPaymentCalcelledEvent(account, command.getOrderId()));
         }
         catch (Exception e) {

@@ -11,7 +11,13 @@
 			"name": "debit",
 			"request": {
 				"method": "PUT",
-				"header": [],
+				"header": [
+					{
+						"key": "X-Request-ID",
+						"value": "de7efba4-267c-11ea-978f-1d728ce88101",
+						"type": "text"
+					}
+				],
 				"url": {
 					"raw": "{{base_url}}:8082/billing/debit?username=NewUser&amount=111.11",
 					"host": [
@@ -40,9 +46,15 @@
 			"name": "credit",
 			"request": {
 				"method": "PUT",
-				"header": [],
+				"header": [
+					{
+						"key": "X-Request-ID",
+						"value": "de7efba4-267c-11ea-978f-1c728ce88101",
+						"type": "text"
+					}
+				],
 				"url": {
-					"raw": "{{base_url}}:8082/billing/credit?username=NewUser&amount=100.10",
+					"raw": "{{base_url}}:8082/billing/credit?username=NewUser&amount=0.11",
 					"host": [
 						"{{base_url}}"
 					],
@@ -58,7 +70,7 @@
 						},
 						{
 							"key": "amount",
-							"value": "100.10"
+							"value": "0.11"
 						}
 					]
 				}

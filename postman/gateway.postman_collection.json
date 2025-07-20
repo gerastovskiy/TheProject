@@ -71,7 +71,46 @@
 			"name": "createClient",
 			"request": {
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "X-Request-ID",
+						"value": "de7efba4-267c-11ea-978f-2e728ce88101",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"NewUser\",\r\n    \"email\": \"NewUser@example.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}:80/users",
+					"host": [
+						"{{base_url}}"
+					],
+					"port": "80",
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "createClient (повторный запрос)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Request-ID",
+						"value": "de7efba4-267c-11ea-978f-2e728ce88101",
+						"type": "text"
+					}
+				],
 				"body": {
 					"mode": "raw",
 					"raw": "{\r\n    \"username\": \"NewUser\",\r\n    \"email\": \"NewUser@example.com\"\r\n}",
@@ -98,7 +137,48 @@
 			"name": "debitAccount",
 			"request": {
 				"method": "PUT",
-				"header": [],
+				"header": [
+					{
+						"key": "X-Request-ID",
+						"value": "de7efba4-267c-11ea-978f-1d728ce88101",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}:80/billing/debit?username=NewUser&amount=111.11",
+					"host": [
+						"{{base_url}}"
+					],
+					"port": "80",
+					"path": [
+						"billing",
+						"debit"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "NewUser"
+						},
+						{
+							"key": "amount",
+							"value": "111.11"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "debitAccount (повторный запрос)",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Request-ID",
+						"value": "de7efba4-267c-11ea-978f-1d728ce88101",
+						"type": "text"
+					}
+				],
 				"url": {
 					"raw": "{{base_url}}:80/billing/debit?username=NewUser&amount=111.11",
 					"host": [
@@ -127,7 +207,48 @@
 			"name": "creditAccount",
 			"request": {
 				"method": "PUT",
-				"header": [],
+				"header": [
+					{
+						"key": "X-Request-ID",
+						"value": "de7efba4-267c-11ea-978f-1c728ce88101",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}:80/billing/credit?username=NewUser&amount=1.10",
+					"host": [
+						"{{base_url}}"
+					],
+					"port": "80",
+					"path": [
+						"billing",
+						"credit"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "NewUser"
+						},
+						{
+							"key": "amount",
+							"value": "1.10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "creditAccount (повторный запрос)",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Request-ID",
+						"value": "de7efba4-267c-11ea-978f-1c728ce88101",
+						"type": "text"
+					}
+				],
 				"url": {
 					"raw": "{{base_url}}:80/billing/credit?username=NewUser&amount=1.10",
 					"host": [
@@ -156,7 +277,46 @@
 			"name": "createOrder (сумма достаточна)",
 			"request": {
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "X-Request-ID",
+						"value": "de7efba4-267c-11ea-978f-2e728ce88121",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"NewUser\",\r\n    \"amount\": 100.01,\r\n    \"productId\": 1,\r\n    \"quantity\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}:80/order",
+					"host": [
+						"{{base_url}}"
+					],
+					"port": "80",
+					"path": [
+						"order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "createOrder (повторный запрос)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Request-ID",
+						"value": "de7efba4-267c-11ea-978f-2e728ce88121",
+						"type": "text"
+					}
+				],
 				"body": {
 					"mode": "raw",
 					"raw": "{\r\n    \"username\": \"NewUser\",\r\n    \"amount\": 100.01,\r\n    \"productId\": 1,\r\n    \"quantity\": 1\r\n}",
@@ -183,7 +343,13 @@
 			"name": "createOrder (сумма недостаточна)",
 			"request": {
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "X-Request-ID",
+						"value": "de7efba4-267c-11ea-978f-2e728ce88122",
+						"type": "text"
+					}
+				],
 				"body": {
 					"mode": "raw",
 					"raw": "{\r\n    \"username\": \"NewUser\",\r\n    \"amount\": 1000,\r\n    \"productId\": 1,\r\n    \"quantity\": 10\r\n}",
@@ -210,10 +376,16 @@
 			"name": "createOrder (количество недостаточно)",
 			"request": {
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "X-Request-ID",
+						"value": "de7efba4-267c-11ea-978f-2e728ce88123",
+						"type": "text"
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"NewUser\",\r\n    \"amount\": 1,\r\n    \"productId\": 2,\r\n    \"quantity\": 1\r\n}",
+					"raw": "{\r\n    \"username\": \"NewUser\",\r\n    \"amount\": 1000,\r\n    \"productId\": 1,\r\n    \"quantity\": 1000\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -263,7 +435,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLXNlcnZpY2UiLCJhdWQiOiJ1c2VyLXNlcnZpY2UiLCJzdWIiOiJOZXdVc2VyIiwiaWF0IjoxNzUxNzQ1NjY2LCJleHAiOjE3NTE3NDc0NjZ9.Fgpu0h_q3QWfGQxoGGgBXp-Q_ckR32PnEs-fZ6sX98U",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhdXRoLXNlcnZpY2UiLCJhdWQiOiJ1c2VyLXNlcnZpY2UiLCJzdWIiOiJOZXdVc2VyIiwiaWF0IjoxNzUzMDIwMDM5LCJleHAiOjE3NTMwMjE4Mzl9.ZeqM7Afut58R-4CQjDOeqqjwLrQHlv7tW6oNBvKyDD0",
 				"type": "string"
 			}
 		]

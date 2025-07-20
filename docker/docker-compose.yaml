@@ -20,6 +20,28 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:8.0.3
+    container_name: redis
+    ports:
+      - 6379:6379
+    environment:
+      - REDIS_PASSWORD=password
+      - REDIS_USER=user
+      - REDIS_USER_PASSWORD=password
+      - REDIS_MAXMEMORY=128mb
+      - REDIS_APPENDONLY="yes"
+    command: redis-server --requirepass password
+    networks:
+      - project-network
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli", "--no-auth-warning", "-a", "password", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   rabbitmq:
     image: rabbitmq:4.1.1-management
     container_name: rabbit-mq
@@ -101,6 +123,9 @@ services:
         DB_USER: user_db
         DB_PORT: 5432
         DB_PASSWORD: postgres
+        REDIS_HOST: redis
+        REDIS_PORT: 6379
+        REDIS_PASSWORD: password
         MQ_HOST: rabbitmq
         MQ_USER: rabbit-mq
         MQ_PASSWORD: rabbit-mq
@@ -133,6 +158,9 @@ services:
         DB_USER: billing_db
         DB_PORT: 5432
         DB_PASSWORD: postgres
+        REDIS_HOST: redis
+        REDIS_PORT: 6379
+        REDIS_PASSWORD: password
         MQ_HOST: rabbitmq
         MQ_USER: rabbit-mq
         MQ_PASSWORD: rabbit-mq
@@ -154,6 +182,8 @@ services:
       depends_on:
         postgres:
           condition: service_healthy
+        redis:
+          condition: service_healthy
       ports:
         - 8083:8083
       networks:
@@ -165,6 +195,9 @@ services:
         DB_USER: order_db
         DB_PORT: 5432
         DB_PASSWORD: postgres
+        REDIS_HOST: redis
+        REDIS_PORT: 6379
+        REDIS_PASSWORD: password
         MQ_HOST: rabbitmq
         MQ_USER: rabbit-mq
         MQ_PASSWORD: rabbit-mq
@@ -284,5 +317,6 @@ networks:
 
 volumes:
   postgres_data:
+  redis_data:
   rabbitmq:
   logs:

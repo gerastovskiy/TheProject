@@ -11,7 +11,13 @@
 			"name": "create",
 			"request": {
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "X-Request-ID",
+						"value": "de7efba4-267c-11ea-978f-2e728ce88101",
+						"type": "text"
+					}
+				],
 				"body": {
 					"mode": "raw",
 					"raw": "{\r\n    \"username\": \"NewUser\",\r\n    \"email\": \"NewUser@example.com\"\r\n}",

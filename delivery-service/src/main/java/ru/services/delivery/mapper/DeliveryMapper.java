@@ -2,6 +2,7 @@ package ru.services.delivery.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import ru.core.events.*;
 import ru.services.delivery.entity.DeliveryEntity;
 import ru.services.delivery.model.Delivery;
@@ -14,7 +15,12 @@ public interface DeliveryMapper {
     @ValidateAfterMapping
     Delivery toDelivery(DeliveryEntity productEntity);
     @ValidateAfterMapping
-    @Mapping(target = "orderId", source = "orderId")
+
+    @Mappings({
+            @Mapping(target = "orderId", source = "orderId"),
+            @Mapping(target = "id", ignore = true),
+            @Mapping(target = "date", ignore = true)
+    })
     Delivery toDelivery(Long orderId);
 
     DeliveryReservedEvent toDeliveryReservedEvent(Long orderId);

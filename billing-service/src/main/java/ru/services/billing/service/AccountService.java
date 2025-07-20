@@ -7,6 +7,6 @@ public interface AccountService {
     Account createAccount(Account user);
     Account getAccount(Long id);
     Account getAccount(String username);
-    Account debitAccount(String username, BigDecimal amount);
-    Account creditAccount(String username, BigDecimal amount);
+    Account debitAccount(String username, BigDecimal amount, String idempotencyKey);
+    Account creditAccount(String username, BigDecimal amount, String idempotencyKey);
 }

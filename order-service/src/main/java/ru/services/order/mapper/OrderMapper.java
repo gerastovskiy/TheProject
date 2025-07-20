@@ -25,6 +25,7 @@ public interface OrderMapper {
 
     @Mapping(target = "orderId", source = "id")
     OrderCreatedEvent toOrderCreatedEvent(Order order);
+    @Mapping(target = "orderId", source = "id")
     OrderCreatedRejectEvent toOrderCreatedRejectEvent(Order order);
 
     @Mappings({

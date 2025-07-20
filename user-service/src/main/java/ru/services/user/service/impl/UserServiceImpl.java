@@ -1,10 +1,12 @@
 package ru.services.user.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.services.user.entity.UserEntity;
 import ru.services.user.exception.DuplicateUserException;
+import ru.services.user.exception.UserAlreadyCreated;
 import ru.services.user.exception.UserNotFoundException;
 import ru.services.user.mapper.UserMapper;
 import ru.services.user.model.User;
@@ -19,6 +21,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper mapper;
     private final MessageSenderService messageSenderService;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Override
     public User getUser(Long id) {
@@ -55,14 +58,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User createUser(User user) {
+    public User createUser(User user, String idempotencyKey) {
+        if (redisTemplate.hasKey(idempotencyKey))
+            throw new UserAlreadyCreated(idempotencyKey);
+
         if (userRepository.existsByUsername(user.username()))
             throw new DuplicateUserException(user.username());
 
         UserEntity userEntity = mapper.toUserEntity(user);
         userRepository.save(userEntity);
-
         user = mapper.toUser(userEntity);
+        redisTemplate.opsForValue().set(idempotencyKey, user.id().toString());
         messageSenderService.sendBillingMessage(mapper.createBillingAccountCommand(user));
         return user;
     }

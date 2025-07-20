@@ -11,7 +11,13 @@
 			"name": "create",
 			"request": {
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "X-Request-ID",
+						"value": "de7efba4-267c-11ea-978f-2e728ce88120",
+						"type": "text"
+					}
+				],
 				"body": {
 					"mode": "raw",
 					"raw": "{\r\n    \"username\": \"NewUser\",\r\n    \"amount\": 1.11,\r\n    \"productId\": 1,\r\n    \"quantity\": 1\r\n}",
