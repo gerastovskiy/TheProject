@@ -1,4 +1,6 @@
 package ru.services.notification.model;
 
-public record Notification(Long id, String username, NotificationType type, String message) {
+import java.sql.Timestamp;
+
+public record Notification(Long id, String username, String contact, NotificationType type, String message, Timestamp created) {
 }

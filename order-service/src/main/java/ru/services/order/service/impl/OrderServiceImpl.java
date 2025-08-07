@@ -77,6 +77,14 @@ public class OrderServiceImpl implements OrderService {
                     .uri(uri)
                     .headers(httpHeaders -> httpHeaders.putAll(headers))
                     .retrieve()
+                    --.onStatus(
+                    --    HttpStatusCode::is4xxClientError,
+                    --    (request, response) -> {
+                    --      throw new MyCustomRuntimeException(
+                    --        response.getStatusCode(),
+                    --        response.getHeaders()
+                    --      )
+                    --  }
                     .toEntity(String.class);
 
             if (response.getStatusCode().is2xxSuccessful()) {
@@ -123,6 +131,7 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new OrderNotFoundException(id));
 
         orderEntity.setStatus(OrderStatus.APPROVED);
+
         orderRepository.save(orderEntity);
 
         rabbitTemplate.convertAndSend(orderRoutingKey, mapper.toOrderApprovedEvent(mapper.toOrder(orderEntity)));

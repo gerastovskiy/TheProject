@@ -49,12 +49,33 @@ build_docker_image() {
         return 1
     fi
     
-    (cd "$service_path" && docker build -t "${service_name}:${DOCKER_IMAGE_TAG}" .)
+    (cd "$service_path" && docker build -t "cyclopeye/${service_name}:${DOCKER_IMAGE_TAG}" .)
     if [ $? -eq 0 ]; then
         echo -e "\033[1;32m[DOCKER] Образ $service_name:$DOCKER_IMAGE_TAG успешно собран\033[0m"
         return 0
     else
         echo -e "\033[1;31m[DOCKER] Ошибка при сборке образа $service_name\033[0m"
+        return 1
+    fi
+}
+
+# Отправка Docker-образа
+push_docker_image() {
+    local service_path="$1"
+    local service_name=$(basename "$service_path")
+    echo -e "\n\033[1;34m[DOCKER] Отправляю образ $service_name:$DOCKER_IMAGE_TAG...\033[0m"
+    
+    if [ ! -f "$service_path/Dockerfile" ]; then
+        echo -e "\033[1;31mОшибка: Dockerfile не найден в $service_path\033[0m"
+        return 1
+    fi
+    
+    (cd "$service_path" && docker push "cyclopeye/${service_name}:${DOCKER_IMAGE_TAG}")
+    if [ $? -eq 0 ]; then
+        echo -e "\033[1;32m[DOCKER] Образ $service_name:$DOCKER_IMAGE_TAG успешно отправлен\033[0m"
+        return 0
+    else
+        echo -e "\033[1;31m[DOCKER] Ошибка при отправке образа $service_name\033[0m"
         return 1
     fi
 }
@@ -177,7 +198,11 @@ while true; do
                 if ! build_docker_image "$abs_path"; then
                     echo "Ошибка сборки образов">&2
                     return 1
-             fi
+                fi
+                if ! push_docker_image "$abs_path"; then
+                    echo "Ошибка отправки образов">&2
+                    return 1
+                fi
             done
             ;;
         3)  # Запуск
@@ -197,6 +222,10 @@ while true; do
                 fi
                 if ! build_docker_image "$abs_path"; then
                     echo "Ошибка сборки образов">&2
+                    return 1
+                fi
+                if ! push_docker_image "$abs_path"; then
+                    echo "Ошибка отправки образов">&2
                     return 1
                 fi
             done

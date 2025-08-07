@@ -1,0 +1,17 @@
+global:
+  scrape_interval: 10s
+  evaluation_interval: 10s
+
+scrape_configs:
+  - job_name: services-metrics
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets:
+        - "gateway:80"
+        - "auth-service:8081"
+        - "user-service:8080"
+        - "billing-service:8082"
+        - "order-service:8083"
+        - "notification-service:8084"
+        - "store-service:8086"
+        - "delivery-service:8087"

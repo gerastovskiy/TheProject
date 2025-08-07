@@ -1,13 +1,13 @@
 package ru.services.auth.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import ru.services.auth.entity.ClientEntity;
 import ru.services.auth.exception.LoginException;
 import ru.services.auth.repository.ClientRepository;
 import ru.services.auth.service.ClientService;
 import ru.services.user.exception.RegistrationException;
-import org.mindrot.jbcrypt.BCrypt;
 import java.util.Optional;
 
 @Service
@@ -20,7 +20,7 @@ public class ClientServiceImpl implements ClientService {
         if(userRepository.findById(clientId).isPresent())
             throw new RegistrationException("Client with id: " + clientId + " already registered");
 
-        String hash = BCrypt.hashpw(clientSecret, BCrypt.gensalt());
+        String hash = BCrypt.hashpw(clientSecret, BCrypt.gensalt(12));
         userRepository.save(new ClientEntity(clientId, hash));
     }
 

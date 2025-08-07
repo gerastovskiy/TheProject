@@ -1,2 +1,4 @@
-insert into product (name, quantity) values ('телефон',1);
-insert into product (name, quantity) values ('телеграф',0);
+insert into product (name, quantity, price, active, description, created, updated) values ('телефон',100, 10.2, true, 'Описание телефона', current_timestamp, current_timestamp);
+insert into product (name, quantity, price, active, description, created, updated) values ('телеграф',5, 30.2, false, 'Описание телеграфа', current_timestamp, current_timestamp);
+insert into product (name, quantity, price, active, description, created, updated) values ('факс',0, 15.2, true, 'Описание факса', current_timestamp, current_timestamp);
+insert into product (name, quantity, price, active, description, created, updated) values ('инфинити',1000000000, 0.2, true, 'Описание инфинити', current_timestamp, current_timestamp);

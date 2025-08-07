@@ -1,0 +1,380 @@
+# --- Gateway Deployment ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      containers:
+      - name: gateway
+        image: cyclopeye/gateway:0.1
+        ports:
+        - containerPort: 80
+---
+# --- Auth Service Deployment ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+      - name: auth-service
+        image: cyclopeye/auth-service:0.1
+        ports:
+        - containerPort: 8081
+        env:
+        - name: DB_HOST
+          value: postgres
+        - name: DB_NAME
+          value: auth_db
+        - name: DB_USER
+          value: auth_db
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: password
+---
+# --- User Service Deployment ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+      - name: user-service
+        image: cyclopeye/user-service:0.1
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_HOST
+          value: postgres
+        - name: DB_NAME
+          value: user_db
+        - name: DB_USER
+          value: user_db
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: password
+        - name: REDIS_HOST
+          value: redis
+        - name: REDIS_PORT
+          value: "6379"
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: password
+        - name: MQ_HOST
+          value: rabbitmq
+        - name: MQ_USER
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-secret
+              key: service-username
+        - name: MQ_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-secret
+              key: service-password
+        - name: MQ_PORT
+          value: "5672"
+---
+# --- Billing Service Deployment ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: billing-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: billing-service
+  template:
+    metadata:
+      labels:
+        app: billing-service
+    spec:
+      containers:
+      - name: billing-service
+        image: cyclopeye/billing-service:0.1
+        ports:
+        - containerPort: 8082
+        env:
+        - name: DB_HOST
+          value: postgres
+        - name: DB_NAME
+          value: billing_db
+        - name: DB_USER
+          value: billing_db
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: password
+        - name: REDIS_HOST
+          value: redis
+        - name: REDIS_PORT
+          value: "6379"
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: password
+        - name: MQ_HOST
+          value: rabbitmq
+        - name: MQ_USER
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-secret
+              key: service-username
+        - name: MQ_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-secret
+              key: service-password
+        - name: MQ_PORT
+          value: "5672"
+---
+# --- Order Service Deployment ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      containers:
+      - name: order-service
+        image: cyclopeye/order-service:0.1
+        ports:
+        - containerPort: 8083
+        env:
+        - name: DB_HOST
+          value: postgres
+        - name: DB_NAME
+          value: order_db
+        - name: DB_USER
+          value: order_db
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: password
+        - name: REDIS_HOST
+          value: redis
+        - name: REDIS_PORT
+          value: "6379"
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: password
+        - name: MQ_HOST
+          value: rabbitmq
+        - name: MQ_USER
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-secret
+              key: service-username
+        - name: MQ_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-secret
+              key: service-password
+        - name: MQ_PORT
+          value: "5672"
+        - name: BILLING_HOST
+          value: billing-service
+        - name: BILLING_PORT
+          value: "8082"
+---
+# --- Store Service Deployment ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: store-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: store-service
+  template:
+    metadata:
+      labels:
+        app: store-service
+    spec:
+      containers:
+      - name: store-service
+        image: cyclopeye/store-service:0.1
+        ports:
+        - containerPort: 8086
+        env:
+        - name: DB_HOST
+          value: postgres
+        - name: DB_NAME
+          value: store_db
+        - name: DB_USER
+          value: store_db
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: password
+        - name: MQ_HOST
+          value: rabbitmq
+        - name: MQ_USER
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-secret
+              key: service-username
+        - name: MQ_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-secret
+              key: service-password
+        - name: MQ_PORT
+          value: "5672"
+---
+# --- Delivery Service Deployment ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: delivery-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: delivery-service
+  template:
+    metadata:
+      labels:
+        app: delivery-service
+    spec:
+      containers:
+      - name: delivery-service
+        image: cyclopeye/delivery-service:0.1
+        ports:
+        - containerPort: 8087
+        env:
+        - name: DB_HOST
+          value: postgres
+        - name: DB_NAME
+          value: delivery_db
+        - name: DB_USER
+          value: delivery_db
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: password
+        - name: MQ_HOST
+          value: rabbitmq
+        - name: MQ_USER
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-secret
+              key: service-username
+        - name: MQ_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-secret
+              key: service-password
+        - name: MQ_PORT
+          value: "5672"
+---
+# --- Notification Service Deployment ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      containers:
+      - name: notification-service
+        image: cyclopeye/notification-service:0.1
+        ports:
+        - containerPort: 8084
+        env:
+        - name: DB_HOST
+          value: postgres
+        - name: DB_NAME
+          value: notification_db
+        - name: DB_USER
+          value: notification_db
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: password
+        - name: MQ_HOST
+          value: rabbitmq
+        - name: MQ_USER
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-secret
+              key: service-username
+        - name: MQ_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-secret
+              key: service-password
+        - name: MQ_PORT
+          value: "5672"

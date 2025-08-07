@@ -14,18 +14,20 @@ public interface NotificationMapper {
     @ValidateAfterMapping
     @Mappings({
             @Mapping(target = "id", ignore = true),
-            @Mapping(target = "username", source = "username"),
-            @Mapping(target = "type", constant = "PUSH"),
-            @Mapping(target = "message", constant = "Order approved!")
+            @Mapping(target = "created",
+                    expression = "java(java.sql.Timestamp.from(java.time.Instant.now()))"),
+            @Mapping(target = "message",
+                    expression = "java(\"Поздравляем, \" + command.getUsername() + \", ваш заказ номер \" + command.getOrderId() + \" оформлен и скоро будет доставлен.\")")
     })
     Notification toNotification(SendApproveOrderNotificationCommand command);
 
     @ValidateAfterMapping
     @Mappings({
             @Mapping(target = "id", ignore = true),
-            @Mapping(target = "username", source = "username"),
-            @Mapping(target = "type", constant = "PUSH"),
-            @Mapping(target = "message", constant = "Order rejected!")
+            @Mapping(target = "created",
+                    expression = "java(java.sql.Timestamp.from(java.time.Instant.now()))"),
+            @Mapping(target = "message",
+                    expression = "java(\"Сожалеем, \" + command.getUsername() + \", ваш заказ номер \" + command.getOrderId() + \" отклонён.\")")
     })
     Notification toNotification(SendRejectOrderNotificationCommand command);
     NotificationEntity toNotificationEntity(Notification user);

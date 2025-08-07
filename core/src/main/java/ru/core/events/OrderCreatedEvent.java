@@ -3,6 +3,8 @@ package ru.core.events;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import ru.core.common.NotificationType;
+
 import java.math.BigDecimal;
 
 @Getter
@@ -14,4 +16,6 @@ public class OrderCreatedEvent extends Event {
     BigDecimal amount;
     Long productId;
     Integer quantity;
+    String contact;
+    NotificationType type;
 }

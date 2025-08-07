@@ -18,7 +18,7 @@ public class ValidationAspect {
 
     @AfterReturning(
             pointcut = "@annotation(ru.services.notification.validation.ValidateAfterMapping) || " +
-                    "execution(* ru.services.user.mapper..*.*(..))",
+                    "execution(* ru.services.notification.mapper..*.*(..))",
             returning = "result"
     )
     public void validateAfterMapping(JoinPoint joinPoint, Object result) {

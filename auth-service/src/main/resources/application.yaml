@@ -2,10 +2,12 @@ server:
   port: 8081
 
 spring:
+  application:
+    name: auth-service
   datasource:
-    username: ${DB_USER:user_db}
+    username: ${DB_USER:auth_db}
     password: ${DB_PASSWORD:postgres}
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:user_db}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:auth_db}
     driverClassName: org.postgresql.Driver
   jpa:
     properties:
@@ -13,11 +15,11 @@ spring:
         show_sql: true
         format_sql: true
         enable_lazy_load_no_trans: false
-        order_inserts: true
+        generate_statistics: true
         jdbc.batch_size: 100
         ddl-auto: validate
-        validator:
-          fail_fast: true
+        order_inserts: true
+        order_updates: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     enabled: true
@@ -32,13 +34,30 @@ spring:
 
 logging:
   level:
+    root: info
+    com:
+      rabbitmq:
+        client: debug
     org:
+      flywaydb: debug
+      springframework:
+        web: debug
+        data:
+          redis: warn
+        amqp: warn
+        transaction: info
+        jdbc:
+          core: debug
       hibernate:
-        type: trace
-        stat: debug
-        orm:
-          jdbc:
-            bind: trace
+        type.descriptor.sql: trace
+        stat: info
+        sql: debug
+        orm.jdbc.bind: trace
+    io.micrometer.tracing: info
+    io.opentelemetry: info
+    #io.opentelemetry.exporter.otlp: debug
+    #io.opentelemetry.sdk.trace: debug
+    reactor.netty: info
 
 management:
   endpoint:
@@ -48,7 +67,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,prometheus
+        include: health, info, prometheus, metrics
     health:
       show-details: always
   metrics:
@@ -59,7 +78,24 @@ management:
     metrics:
       export:
         enabled: true
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+    baggage:
+      remote-fields: "*"
+    propagation:
+      type: w3c
+  otlp:
+    tracing:
+      endpoint: http://jaeger:4318/v1/traces
+  opentelemetry:
+    resource-attributes:
+      service.name: ${spring.application.name}
 
 auth:
   jwt:
-    secret: ${JWT_SECRET:9c414a661d00ad35845101c010f1fd461597e123e11851a64f6b6d270d23bfaa}
+    secret: 9c414a661d00ad35845101c010f1fd461597e123e11851a64f6b6d270d23bfaa
+    issuer: auth-service
+    expiration-minutes: 30
+    audience: user-service,billing-service,order-service,store-service

@@ -16,7 +16,10 @@ public interface OrderMapper {
     @ValidateAfterMapping
     @Mappings({
             @Mapping(target = "id", ignore = true),
-            @Mapping(target = "status", constant = "CREATED")
+            @Mapping(target = "uuid", ignore = true),
+            @Mapping(target = "status", constant = "CREATED"),
+            @Mapping(target = "created", ignore = true),
+            @Mapping(target = "updated", ignore = true)
     })
     Order toOrder(OrderRequest Request);
     OrderEntity toOrderEntity(Order order);
@@ -33,7 +36,9 @@ public interface OrderMapper {
             @Mapping(target = "description", ignore = true)
     })
     OrderRejectedEvent toOrderRejectedEvent(Order order);
-    @Mapping(target = "orderId", source = "id")
+    @Mappings({
+        @Mapping(target = "orderId", source = "id"),
+    })
     OrderApprovedEvent toOrderApprovedEvent(Order order);
 
     // order

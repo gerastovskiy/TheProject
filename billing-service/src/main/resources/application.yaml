@@ -2,6 +2,8 @@ server:
   port: 8082
 
 spring:
+  application:
+    name: billing-service
   datasource:
     username: ${DB_USER:billing_db}
     password: ${DB_PASSWORD:postgres}
@@ -13,11 +15,11 @@ spring:
         show_sql: true
         format_sql: true
         enable_lazy_load_no_trans: false
-        order_inserts: true
+        generate_statistics: true
         jdbc.batch_size: 100
         ddl-auto: validate
-        validator:
-          fail_fast: true
+        order_inserts: true
+        order_updates: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     enabled: true
@@ -34,27 +36,49 @@ spring:
     password: ${MQ_PASSWORD:rabbit-mq}
     host: ${MQ_HOST:localhost}
     port: ${MQ_PORT:5672}
+    template:
+      observation-enabled: true
+    listener:
+      simple:
+        observation-enabled: true
+    cache:
+      channel:
+        size: 5
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:password}
+  cache:
+    redis:
+      time-to-live: 600000
 
 logging:
   level:
+    root: info
     com:
       rabbitmq:
         client: debug
     org:
+      flywaydb: debug
       springframework:
-        amqp: debug
-        retry: debug
+        web: debug
+        data:
+          redis: warn
+        amqp: warn
+        transaction: info
+        jdbc:
+          core: debug
       hibernate:
-        type: trace
-        stat: debug
-        orm:
-          jdbc:
-            bind: trace
+        type.descriptor.sql: trace
+        stat: info
+        sql: debug
+        orm.jdbc.bind: trace
+    io.micrometer.tracing: info
+    io.opentelemetry: info
+    #io.opentelemetry.exporter.otlp: debug
+    #io.opentelemetry.sdk.trace: debug
+    reactor.netty: info
 
 rabbitmq:
   exchange:
@@ -72,7 +96,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,prometheus
+        include: health, info, prometheus, metrics
     health:
       show-details: always
   metrics:
@@ -83,8 +107,22 @@ management:
     metrics:
       export:
         enabled: true
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+    baggage:
+      remote-fields: "*"
+    propagation:
+      type: w3c
+  otlp:
+    tracing:
+      endpoint: http://jaeger:4318/v1/traces
+  opentelemetry:
+    resource-attributes:
+      service.name: ${spring.application.name}
 
 auth:
   enabled: true
   jwt:
-    secret: ${JWT_SECRET:9c414a661d00ad35845101c010f1fd461597e123e11851a64f6b6d270d23bfaa}
+    secret: 9c414a661d00ad35845101c010f1fd461597e123e11851a64f6b6d270d23bfaa

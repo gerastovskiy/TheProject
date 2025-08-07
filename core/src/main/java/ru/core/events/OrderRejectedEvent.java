@@ -3,6 +3,8 @@ package ru.core.events;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import ru.core.common.NotificationType;
+
 import java.math.BigDecimal;
 
 @Getter
@@ -15,4 +17,6 @@ public class OrderRejectedEvent {
     Long productId;
     Integer quantity;
     String description;
+    String contact;
+    NotificationType type;
 }

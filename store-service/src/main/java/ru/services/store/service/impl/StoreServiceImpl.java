@@ -10,6 +10,9 @@ import ru.services.store.mapper.ProductMapper;
 import ru.services.store.model.Product;
 import ru.services.store.repository.ProductRepository;
 import ru.services.store.service.StoreService;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Transactional
 @Service
@@ -42,5 +45,19 @@ public class StoreServiceImpl implements StoreService {
         productRepository.save(productEntity);
 
         return mapper.toProduct(productEntity);
+    }
+
+    @Override
+    public List<Product> getProductsList(String name) {
+        List<ProductEntity> productEntity = new ArrayList<>();
+
+        if (name != null && !name.isEmpty()) {
+            productEntity = productRepository.findByNameContainingIgnoreCase(name);
+        }
+        else {
+            productEntity = productRepository.findAll();
+        }
+
+        return productEntity.stream().map(mapper::toProduct).collect(Collectors.toList());
     }
 }

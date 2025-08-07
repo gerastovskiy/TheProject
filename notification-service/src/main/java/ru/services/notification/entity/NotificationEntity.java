@@ -1,10 +1,14 @@
 package ru.services.notification.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import ru.services.notification.model.NotificationType;
+
+import java.sql.Timestamp;
 
 @Entity
 @AllArgsConstructor
@@ -20,8 +24,12 @@ public class NotificationEntity {
     @NotBlank
     @Size(min = 1, max = 50)
     private String username;
+    @Schema(description = "Contact", example = "alex@example.com")
+    @NotBlank(message = "Contact cannot be empty")
+    String contact;
     @Enumerated(EnumType.STRING)
     private NotificationType type;
     @NotBlank
     private String message;
+    private Timestamp created;
 }

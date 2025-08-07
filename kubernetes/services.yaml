@@ -1,0 +1,173 @@
+# --- Postgres Service ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  selector:
+    app: postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+---
+# --- Redis Service ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+spec:
+  selector:
+    app: redis
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+---
+# --- Fluentd Service ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fluentd
+spec:
+  selector:
+    app: fluentd
+  ports:
+    - name: tcp-port
+      port: 24224
+      targetPort: 24224
+      protocol: TCP
+    - name: udp-port
+      port: 24224
+      targetPort: 24224
+      protocol: UDP   
+---
+# --- RabbitMQ Service ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+spec:
+  selector:
+    app: rabbitmq
+  ports:
+    - name: management
+      protocol: TCP
+      port: 15672
+      targetPort: 15672
+    - name: amqp
+      protocol: TCP
+      port: 5672
+      targetPort: 5672
+---
+# --- Gateway Service ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+spec:
+  type: ClusterIP
+  selector:
+    app: gateway
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+# --- Auth Service ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+spec:
+  type: ClusterIP
+  selector:
+    app: auth-service
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
+---
+# --- User Service ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+spec:
+  type: ClusterIP
+  selector:
+    app: user-service
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+# --- Billing Service ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: billing-service
+spec:
+  type: ClusterIP
+  selector:
+    app: billing-service
+  ports:
+    - protocol: TCP
+      port: 8082
+      targetPort: 8082
+---
+# --- Order Service ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+spec:
+  type: ClusterIP
+  selector:
+    app: order-service
+  ports:
+    - protocol: TCP
+      port: 8083
+      targetPort: 8083
+---
+# --- Notification Service ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+spec:
+  type: ClusterIP
+  selector:
+    app: notification-service
+  ports:
+    - protocol: TCP
+      port: 8084
+      targetPort: 8084
+---
+# --- Store Service ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: store-service
+spec:
+  type: ClusterIP
+  selector:
+    app: store-service
+  ports:
+    - protocol: TCP
+      port: 8086
+      targetPort: 8086
+---
+# --- Delivery Service ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: delivery-service
+spec:
+  type: ClusterIP
+  selector:
+    app: delivery-service
+  ports:
+    - protocol: TCP
+      port: 8087
+      targetPort: 8087

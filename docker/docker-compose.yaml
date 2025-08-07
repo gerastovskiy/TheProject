@@ -1,4 +1,56 @@
 services:
+  elasticsearch:
+    image: elasticsearch:8.19.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+      - FLUENTD_OPT=-vv
+      - TZ=Europe/Moscow
+    ports:
+      - "9200:9200"
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://elasticsearch:9200"]
+        interval: 10s
+        timeout: 5s
+        retries: 10
+    networks:
+      - project-network
+
+  kibana:
+    image: kibana:8.19.0
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+        - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+        - ELASTICSEARCH_SSL_VERIFICATIONMODE=none
+        - TZ=Europe/Moscow
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - project-network
+
+  fluentd:
+    image: fluent/fluentd-kubernetes-daemonset:v1.18-debian-elasticsearch8-1
+    container_name: fluentd
+    environment:
+        - FLUENTD_CONF=fluent.conf
+        - FLUENT_UID=0
+        - TZ=Europe/Moscow
+    volumes:
+      - ./init/fluentd.conf:/fluentd/etc/fluent.conf
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - project-network
+
   postgres:
     image: postgres:17.5
     container_name: postgres-db
@@ -7,10 +59,9 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: "postgres"
       POSTGRES_MULTIPLE_DATABASES: auth_db, user_db, order_db, billing_db, store_db, delivery_db, notification_db
+      TZ: Europe/Moscow
     ports:
       - 5432:5432
-    networks:
-      - project-network
     volumes:
       - ./init/postgresql.sh:/docker-entrypoint-initdb.d/multiple-databases.sh
       - postgres_data:/var/lib/postgresql/data
@@ -19,9 +70,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - project-network
 
   redis:
-    image: redis:8.0.3
+    image: redis:8.2.0
     container_name: redis
     ports:
       - 6379:6379
@@ -31,9 +84,8 @@ services:
       - REDIS_USER_PASSWORD=password
       - REDIS_MAXMEMORY=128mb
       - REDIS_APPENDONLY="yes"
+      - TZ=Europe/Moscow
     command: redis-server --requirepass password
-    networks:
-      - project-network
     volumes:
       - redis_data:/data
     healthcheck:
@@ -41,9 +93,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - project-network
 
   rabbitmq:
-    image: rabbitmq:4.1.1-management
+    image: rabbitmq:4.1.3-management
     container_name: rabbit-mq
     hostname: rabbitmq
     restart: "no"
@@ -53,32 +107,79 @@ services:
       - RABBITMQ_TRACING_ENABLED=true
       - RABBITMQ_TRACING_FORMAT=json
       - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit log_levels [{connection,debug},{channel,debug},{queue,debug},{default,debug}] disk_free_limit 2147483648
+      - TZ=Europe/Moscow
     ports:
       - 15672:15672
       - 5672:5672
-    networks:
-      - project-network
     volumes:
       - ./init/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
       - ./init/definitions.json:/etc/rabbitmq/definitions.json:ro
       - rabbitmq:/var/lib/rabbitmq
+    networks:
+      - project-network
+
+  prometheus:
+    image: bitnami/prometheus:3.5.0
+    container_name: prometheus
+    environment:
+      - TZ=Europe/Moscow
+    volumes:
+      - ./init/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090
+    networks:
+      - project-network
+  
+  grafana:
+    image: grafana/grafana:12.2.0-16764329129
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - TZ=Europe/Moscow
+    volumes:
+      - grafana-data:/var/lib/grafana
+    ports:
+      - 3000:3000
+    networks:
+      - project-network
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.71.0
+    container_name: jaeger
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - TZ=Europe/Moscow
+    volumes:
+      - jaeger-data:/badger/data
+      - jaeger-key:/badger/key
+      - jaeger-tmp:/tmp
+    networks:
+      - project-network
 
   gateway:
-      image: gateway:0.1
+      image: cyclopeye/gateway:0.1
       container_name: gateway
       restart: "no"
       ports:
         - 80:80
-      networks:
-        - project-network
       environment:
         VIRTUAL_HOST: gateway.docker
         SPRING_PROFILES_ACTIVE: docker
+        TZ: Europe/Moscow
       volumes:
         - logs:/app/logs
+      networks:
+        - project-network
 
   auth-service:
-      image: auth-service:0.1
+      image: cyclopeye/auth-service:0.1
       container_name: auth-service
       restart: "no"
       depends_on:
@@ -86,8 +187,6 @@ services:
           condition: service_healthy
       ports:
         - 8081:8081
-      networks:
-        - project-network
       environment:
         VIRTUAL_HOST: auth-service.docker
         DB_HOST: postgres
@@ -96,6 +195,7 @@ services:
         DB_PORT: 5432
         DB_PASSWORD: postgres
         SPRING_PROFILES_ACTIVE: docker
+        TZ: Europe/Moscow
       healthcheck:
             test: ["CMD-SHELL", "curl -f http://localhost:8081/actuator/health || exit 1"]
             interval: 30s
@@ -104,9 +204,11 @@ services:
             start_period: 60s
       volumes:
         - logs:/app/logs
+      networks:
+        - project-network
 
   user-service:
-      image: user-service:0.1
+      image: cyclopeye/user-service:0.1
       container_name: user-service
       restart: "no"
       depends_on:
@@ -114,8 +216,6 @@ services:
           condition: service_healthy
       ports:
         - 8080:8080
-      networks:
-        - project-network
       environment:
         VIRTUAL_HOST: user-service.docker
         DB_HOST: postgres
@@ -131,6 +231,7 @@ services:
         MQ_PASSWORD: rabbit-mq
         MQ_PORT: 5672
         SPRING_PROFILES_ACTIVE: docker
+        TZ: Europe/Moscow
       healthcheck:
             test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
             interval: 30s
@@ -139,9 +240,11 @@ services:
             start_period: 60s
       volumes:
         - logs:/app/logs
+      networks:
+        - project-network
 
   billing-service:
-      image: billing-service:0.1
+      image: cyclopeye/billing-service:0.1
       container_name: billing-service
       restart: "no"
       depends_on:
@@ -149,8 +252,6 @@ services:
           condition: service_healthy
       ports:
         - 8082:8082
-      networks:
-        - project-network
       environment:
         VIRTUAL_HOST: billing-service.docker
         DB_HOST: postgres
@@ -166,6 +267,7 @@ services:
         MQ_PASSWORD: rabbit-mq
         MQ_PORT: 5672
         SPRING_PROFILES_ACTIVE: docker
+        TZ: Europe/Moscow
       healthcheck:
             test: ["CMD-SHELL", "curl -f http://localhost:8082/actuator/health || exit 1"]
             interval: 30s
@@ -174,9 +276,11 @@ services:
             start_period: 60s
       volumes:
         - logs:/app/logs
+      networks:
+        - project-network
 
   order-service:
-      image: order-service:0.1
+      image: cyclopeye/order-service:0.1
       container_name: order-service
       restart: "no"
       depends_on:
@@ -186,8 +290,6 @@ services:
           condition: service_healthy
       ports:
         - 8083:8083
-      networks:
-        - project-network
       environment:
         VIRTUAL_HOST: order-service.docker
         DB_HOST: postgres
@@ -205,6 +307,15 @@ services:
         BILLING_HOST: billing-service
         BILLING_PORT: 8082
         SPRING_PROFILES_ACTIVE: docker
+        OTEL_SERVICE_NAME: order-service
+        OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4317
+        OTEL_TRACES_EXPORTER: otlp
+        OTEL_METRICS_EXPORTER: none
+        OTEL_PROPAGATORS: tracecontext,b3
+        OTEL_LOGS_EXPORTER: none
+        FB_HOST: fluentd
+        FB_PORT: 24224
+        TZ: Europe/Moscow
       healthcheck:
             test: ["CMD-SHELL", "curl -f http://localhost:8083/actuator/health || exit 1"]
             interval: 30s
@@ -213,9 +324,11 @@ services:
             start_period: 60s
       volumes:
         - logs:/app/logs
+      networks:
+        - project-network
 
   store-service:
-      image: store-service:0.1
+      image: cyclopeye/store-service:0.1
       container_name: store-service
       restart: "no"
       depends_on:
@@ -223,8 +336,6 @@ services:
           condition: service_healthy
       ports:
         - 8086:8086
-      networks:
-        - project-network
       environment:
         VIRTUAL_HOST: store-service.docker
         DB_HOST: postgres
@@ -237,6 +348,7 @@ services:
         MQ_PASSWORD: rabbit-mq
         MQ_PORT: 5672
         SPRING_PROFILES_ACTIVE: docker
+        TZ: Europe/Moscow
       healthcheck:
             test: ["CMD-SHELL", "curl -f http://localhost:8086/actuator/health || exit 1"]
             interval: 30s
@@ -245,9 +357,11 @@ services:
             start_period: 60s
       volumes:
         - logs:/app/logs
+      networks:
+        - project-network
 
   delivery-service:
-      image: delivery-service:0.1
+      image: cyclopeye/delivery-service:0.1
       container_name: delivery-service
       restart: "no"
       depends_on:
@@ -255,8 +369,6 @@ services:
           condition: service_healthy
       ports:
         - 8087:8087
-      networks:
-        - project-network
       environment:
         VIRTUAL_HOST: delivery-service.docker
         DB_HOST: postgres
@@ -269,6 +381,7 @@ services:
         MQ_PASSWORD: rabbit-mq
         MQ_PORT: 5672
         SPRING_PROFILES_ACTIVE: docker
+        TZ: Europe/Moscow
       healthcheck:
             test: ["CMD-SHELL", "curl -f http://localhost:8087/actuator/health || exit 1"]
             interval: 30s
@@ -277,9 +390,11 @@ services:
             start_period: 60s
       volumes:
         - logs:/app/logs
+      networks:
+        - project-network
 
   notification-service:
-      image: notification-service:0.1
+      image: cyclopeye/notification-service:0.1
       container_name: notification-service
       restart: "no"
       depends_on:
@@ -287,8 +402,6 @@ services:
           condition: service_healthy
       ports:
         - 8084:8084
-      networks:
-        - project-network
       environment:
         VIRTUAL_HOST: notification-service.docker
         DB_HOST: postgres
@@ -301,6 +414,10 @@ services:
         MQ_PASSWORD: rabbit-mq
         MQ_PORT: 5672
         SPRING_PROFILES_ACTIVE: docker
+        EMAIL_USER: test@test.com
+        EMAIL_PASSWORD: password
+        TELEGRAM_BOT_TOKEN: 8200212857:AAHpsIHuT4Pexh1LmGP60IyVY70K1dAXUDo
+        TZ: Europe/Moscow
       healthcheck:
             test: ["CMD-SHELL", "curl -f http://localhost:8084/actuator/health || exit 1"]
             interval: 30s
@@ -309,6 +426,8 @@ services:
             start_period: 60s
       volumes:
         - logs:/app/logs
+      networks:
+        - project-network
 
 networks:
   project-network:
@@ -319,4 +438,8 @@ volumes:
   postgres_data:
   redis_data:
   rabbitmq:
+  grafana-data:
+  jaeger-data:
+  jaeger-key:
+  jaeger-tmp:
   logs:

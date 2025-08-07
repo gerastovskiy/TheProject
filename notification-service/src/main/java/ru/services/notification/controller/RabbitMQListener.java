@@ -19,7 +19,7 @@ public class RabbitMQListener {
     public void handleSendApproveOrderNotificationCommand(SendApproveOrderNotificationCommand command) {
         // TODO: реализовать обработку ошибок
         try {
-            notificationService.createNotification(mapper.toNotification(command));
+            notificationService.sendNotification(mapper.toNotification(command));
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -30,7 +30,7 @@ public class RabbitMQListener {
     public void handleSendRejectOrderNotificationCommand(SendRejectOrderNotificationCommand command) {
         // TODO: реализовать обработку ошибок
         try {
-            notificationService.createNotification(mapper.toNotification(command));
+            notificationService.sendNotification(mapper.toNotification(command));
         }
         catch (Exception e) {
             e.printStackTrace();

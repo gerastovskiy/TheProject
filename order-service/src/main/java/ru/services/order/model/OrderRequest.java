@@ -1,6 +1,8 @@
 package ru.services.order.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -17,6 +19,10 @@ public record OrderRequest(
         @Positive(message = "Product id must be positive")
         Long productId,
         @Positive(message = "Product quantity must be positive")
-        Integer quantity
-){
+        Integer quantity,
+        @Schema(description = "Contact", example = "alex@example.com")
+        @NotBlank(message = "Contact cannot be empty")
+        String contact,
+        @Enumerated(EnumType.STRING)
+        NotificationType type){
 }

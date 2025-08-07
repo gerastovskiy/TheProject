@@ -1,0 +1,181 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-script
+data:
+  init.sh: |
+    #!/bin/bash
+    set -o errexit
+    set -x
+
+    function create_user_database_and_schema() {
+        local DB_NAME=$1
+        echo "Creating user, database and schema for '$DB_NAME'"
+        
+        # Создание пользователя
+        psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
+            CREATE USER ${DB_NAME} WITH PASSWORD '${POSTGRES_PASSWORD}';
+    EOSQL
+
+        # Создание БД
+        psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
+            CREATE DATABASE ${DB_NAME};
+            ALTER DATABASE ${DB_NAME} OWNER TO ${DB_NAME};
+            GRANT ALL PRIVILEGES ON DATABASE ${DB_NAME} TO ${DB_NAME};
+    EOSQL
+
+        # Создание схемы в БД
+        #psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$DB_NAME" <<-EOSQL
+        #    CREATE SCHEMA $DB_NAME AUTHORIZATION "$DB_NAME";
+        #    GRANT ALL PRIVILEGES ON SCHEMA "$DB_NAME" TO "$DB_NAME";
+        #    ALTER ROLE $DB_NAME SET search_path TO "$DB_NAME";
+    #EOSQL
+    }
+
+    if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
+        echo "Multiple database creation requested: $POSTGRES_MULTIPLE_DATABASES"
+        for db in $(echo "$POSTGRES_MULTIPLE_DATABASES" | tr ',' ' '); do
+            create_user_database_and_schema "$db"
+        done
+        echo "Multiple databases with schemas created"
+    else
+        echo "No additional databases to create"
+    fi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rabbitmq-config
+data:
+  rabbitmq.conf: |
+    management.load_definitions = /etc/rabbitmq/definitions.json
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rabbitmq-definitions
+data:
+  definitions.json: |-
+    {
+    "vhosts": [
+        {
+          "name": "/"
+        }
+      ],
+    "queues": [
+        {
+            "name": "*.order.events",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {}
+        },
+        {
+            "name": "*.billing.events",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {}
+        },
+        {
+            "name": "*.store.events",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {}
+        },
+        {
+            "name": "*.delivery.events",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {}
+        },
+        {
+            "name": "*.notification.events",
+            "vhost": "/",
+            "durable": true,
+            "auto_delete": false,
+            "arguments": {}
+        }
+    ],
+    "exchanges": [],
+    "bindings": [
+        {
+            "source": "amq.topic",
+            "vhost": "/",
+            "destination": "*.order.events",
+            "destination_type": "queue",
+            "routing_key": "#.order.events",
+            "arguments": {}
+        },
+        {
+            "source": "amq.topic",
+            "vhost": "/",
+            "destination": "*.billing.events",
+            "destination_type": "queue",
+            "routing_key": "#.billing.events",
+            "arguments": {}
+        },
+        {
+            "source": "amq.topic",
+            "vhost": "/",
+            "destination": "*.store.events",
+            "destination_type": "queue",
+            "routing_key": "#.store.events",
+            "arguments": {}
+        },
+        {
+            "source": "amq.topic",
+            "vhost": "/",
+            "destination": "*.delivery.events",
+            "destination_type": "queue",
+            "routing_key": "#.delivery.events",
+            "arguments": {}
+        },
+        {
+            "source": "amq.topic",
+            "vhost": "/",
+            "destination": "*.notification.events",
+            "destination_type": "queue",
+            "routing_key": "#.notification.events",
+            "arguments": {}
+        }
+      ],
+    "users": [
+        {
+          "name": "rabbit-mq",
+          "password_hash": "3iGGuXLw30VhgmesqQ2U/rVMGNcnwe27t322BVYD54E2QiYG",
+          "hashing_algorithm": "rabbit_password_hashing_sha256",
+          "tags": [
+            "administrator"
+          ],
+          "limits": {}
+        }
+      ],
+    "permissions": [
+        {
+          "user": "rabbit-mq",
+          "vhost": "/",
+          "configure": ".*",
+          "write": ".*",
+          "read": ".*"
+        }
+      ]
+     }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd-config
+data:
+  fluent.conf: |
+    <source>
+      @type forward
+      port 24224
+      bind 0.0.0.0
+    </source>
+    
+    <match **>
+      @type stdout
+    </match>

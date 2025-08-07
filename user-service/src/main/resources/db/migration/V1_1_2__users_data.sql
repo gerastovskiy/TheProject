@@ -1,2 +1,2 @@
-insert into users (username, email, role) values ('SuperAdmin','SuperAdmin@example.com','ADMIN');
-insert into users (username, email, role) values ('SuperUser','SuperUser@example.com','USER');
+insert into users (username, first_name, last_name, email, phone, telegram, address, role) values ('SuperAdmin','Super', 'Admin','SuperAdmin@example.com','+79999999999',111,'Москва, Красная Площадь, д.2','ADMIN');
+insert into users (username, first_name, last_name, email, phone, telegram, address, role) values ('SuperUser','Super', 'User','SuperUser@example.com','+79999999999',222,'Москва, Красная Площадь, д.3', 'USER');

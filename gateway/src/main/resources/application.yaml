@@ -1,60 +1,145 @@
 server:
   port: 80
 
-logging:
-  level:
-    reactor:
-      netty: INFO
-    org:
-      springframework:
-        cloud:
-          gateway: TRACE
-
 spring:
+  application:
+    name: gateway
   cloud:
-    gateway.server.webflux:
-      httpserver:
-        wiretap: true
-      httpclient:
-        wiretap: true
-        ssl:
-          use-insecure-trust-manager: true
-      routes:
-        - id: registration
-          uri: http://${AUTH_URL:auth-service}:${AUTH_PORT:8081}
-          predicates:
-            - Path=/registration
-          filters:
-            - RewritePath=/registration, /auth
+    gateway:
+      server:
+        webflux:
+          httpclient:
+            wiretap: true
+            ssl:
+              use-insecure-trust-manager: true
+          routes:
+            - id: registration
+              uri: http://${AUTH_URL:auth-service}:${AUTH_PORT:8081}
+              predicates:
+                - Path=/registration
+              filters:
+                - RewritePath=/registration, /auth
+                - name: CircuitBreaker
+                  args:
+                    name: authCircuitBreaker
+                    fallbackUri: forward:/fallback/auth
+                    statusCodes: 500,503,504,429
 
-        - id: token
-          uri: http://${AUTH_URL:auth-service}:${AUTH_PORT:8081}
-          predicates:
-            - Path=/login
-          filters:
-            - RewritePath=/login, /auth/token
+            - id: token
+              uri: http://${AUTH_URL:auth-service}:${AUTH_PORT:8081}
+              predicates:
+                - Path=/login
+              filters:
+                - RewritePath=/login, /auth/token
+                - name: CircuitBreaker
+                  args:
+                    name: authCircuitBreaker
+                    fallbackUri: forward:/fallback/auth
+                    statusCodes: 500,503,504,429
 
-        - id: user-service
-          uri: http://${USER_URL:user-service}:${USER_PORT:8080}
-          predicates:
-            - Path=/users/**
+            - id: user-service
+              uri: http://${USER_URL:user-service}:${USER_PORT:8080}
+              predicates:
+                - Path=/api/users/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: userCircuitBreaker
+                    fallbackUri: forward:/fallback/user
+                    statusCodes: 500,503,504,429
 
-        - id: billing-service
-          uri: http://${USER_URL:billing-service}:${USER_PORT:8082}
-          predicates:
-            - Path=/billing/**
+            - id: billing-service
+              uri: http://${USER_URL:billing-service}:${USER_PORT:8082}
+              predicates:
+                - Path=/api/billing/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: billingCircuitBreaker
+                    fallbackUri: forward:/fallback/billing
+                    statusCodes: 500,503,504,429
 
-        - id: order-service
-          uri: http://${USER_URL:order-service}:${USER_PORT:8083}
-          predicates:
-            - Path=/order/**
+            - id: order-service
+              uri: http://${USER_URL:order-service}:${USER_PORT:8083}
+              predicates:
+                - Path=/api/orders/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: orderCircuitBreaker
+                    fallbackUri: forward:/fallback/order
+                    statusCodes: 500,503,504,429
 
-        - id: notification-service
-          uri: http://${USER_URL:notification-service}:${USER_PORT:8084}
-          predicates:
-            - Path=/notification/**
+            - id: store-service
+              uri: http://${USER_URL:store-service}:${USER_PORT:8086}
+              predicates:
+                - Path=/api/store/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: storeCircuitBreaker
+                    fallbackUri: forward:/fallback/store
+                    statusCodes: 500,503,504,429
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+    instances:
+      authCircuitBreaker:
+        baseConfig: default
+      userCircuitBreaker:
+        baseConfig: default
+      billingCircuitBreaker:
+        baseConfig: default
+      orderCircuitBreaker:
+        baseConfig: default
+      storeCircuitBreaker:
+        baseConfig: default
+
+
 management:
+  endpoints:
+    web:
+      exposure:
+        include: health, circuitbreakers, prometheus
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
   prometheus:
     metrics:
       export:
         enabled: true
+  health:
+    circuitbreakers:
+      enabled: true
+  tracing:
+    enabled: true
+    sampling.probability: 1.0
+    baggage.remote-fields: "*"
+    propagation.type: w3c
+  otlp:
+    tracing:
+      endpoint: http://jaeger:4318/v1/traces
+  opentelemetry:
+    resource-attributes:
+      service.name: ${spring.application.name}
+
+logging:
+  level:
+    root: info
+    org.springframework.cloud.gateway: info
+    org.springframework.web.reactive: debug
+    io.micrometer.tracing: debug
+    io.opentelemetry: info
+    #io.opentelemetry.exporter.otlp: info
+    #io.opentelemetry.sdk.trace: info
+    reactor.netty: info
